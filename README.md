@@ -1,9 +1,6 @@
 # PCA-from-VCF-files
 This project demonstrates how to perform principal component analysis (PCA) using an aggregated VCF file or multiple non-aggregated VCF files.
 
-
-
-````markdown
 # Principal Component Analysis (PCA) from VCF files
 
 HELLO!
