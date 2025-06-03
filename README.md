@@ -75,7 +75,7 @@ To run this pipeline, you will need:
 - Reference genome FASTA (.fa) and its index (.fai) for the chosen build (e.g., hg19/hg38), available from here ([hg19](https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/)/[hg38](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/)).
 
 
-> **Note on PLINK in our case study**
+> **NOTE on PLINK in our case study**
 > `Plink` accepts VCF files as input (which must be accompanied by their respective `.tbi` index file). It is crucial that the VCF file contains the `GT` (genotype) field for each sample.
 > Our input file will be a `vcf.gz` with its `.tbi` index file. In this particular case study, it is assumed that the `CHROM` column contains chromosomes denoted as "`N`" and the `ID` column is formatted as "`CHROM:POS:REF:ALT`". However, modifying the `ID` column or the `CHROM`column is not strictly necessary for PCA, as `plink` does not use it directly for this analysis.
 >
@@ -87,7 +87,7 @@ To run this pipeline, you will need:
 
 Frequently, in studies, the need arises to compare multiple cohorts. For example, one might want to compare data from patients belonging to a "mesothelioma" cohort with data for the same pathology but originating from a different laboratory.
 
-> #### NOTE
+> **NOTE**
 > If your only need is to merge two VCF files belonging to different cohorts, normalizing them, you can skip directly to step **3) Merging Cohorts**.
 
 ---
