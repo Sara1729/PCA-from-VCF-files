@@ -146,8 +146,7 @@ For these steps, the use of a mapping files `no_chr_name_convention.txt` and `ch
     ```bash
     bcftools annotate --rename-chrs /path/to/chr_name_conv.txt \
     /path/to/fixref_splt_merged_file_cohort1.vcf.gz | \
-    bcftools norm -Ou -f /path/to/hg19.fa # or hg38.fa
-    | \
+    bcftools norm -Ou -f /path/to/hg19.fa # or hg38.fa | \
     bcftools annotate -Oz -x ID -I +'%CHROM:%POS:%REF:%ALT' \
     -o /path/to/newID_fixref_splt_merged_file_cohort1.vcf.gz
     ```
@@ -206,7 +205,7 @@ It is good practice to perform some checks on the final merged VCF file:
   * **Check for any REF/ALT flips post-merge**:
     The `bcftools +fixref` command may require chromosomes to be in `chrN` format. If the merged file uses the `N` notation, temporary reconversion is necessary.
 
-      * Rename chromosomes from `N` to `chrN` (using a mapping file like `chr_name_conv.txt`):
+      - Rename chromosomes from `N` to `chrN` (using a mapping file like `chr_name_conv.txt`):
 
         ```bash
         bcftools annotate --rename-chrs /path/to/chr_name_conv.txt \
@@ -214,14 +213,14 @@ It is good practice to perform some checks on the final merged VCF file:
         -o /path/to/CHR_merged_cohorts.vcf.gz
         ```
 
-      * **OPTIONAL** Use `fixref` to check and correct any flips:
+  * **OPTIONAL** Use `fixref` to check and correct any flips:
 
-        ```bash
-        bcftools +fixref /path/to/CHR_merged_cohorts.vcf.gz \
-        -Oz -o /path/to/FIXREF_CHR_merged_cohorts.vcf.gz \
-        -- -f /path/to/hg19.fa # or hg38.fa
-        --mode flip --discard
-        ```
+    ```bash
+    bcftools +fixref /path/to/CHR_merged_cohorts.vcf.gz \
+    -Oz -o /path/to/FIXREF_CHR_merged_cohorts.vcf.gz \
+    -- -f /path/to/hg19.fa # or hg38.fa
+    --mode flip --discard
+    ```
 
 -----
 
