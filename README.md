@@ -107,36 +107,38 @@ Next, perform the merge:
 bcftools merge --threads 64 -l list_vcf.list -Oz -o /path/to/merged_file_cohort1.vcf.gz
 ````
 
-  * It is good practice to generate statistics with `bcftools stats` to verify the integrity of the generated file:
+  - It is good practice to generate statistics with `bcftools stats` to verify the integrity of the generated file:
 
     ```bash
-    bcftools stats merged_file_cohort1.vcf.gz > merged_file_cohort1.stat
+    /path/to/bcftools stats merged_file_cohort1.vcf.gz > /path/to/merged_file_cohort1.stat
     ```
 
     The file to inspect is `merged_file_cohort1.stat`.
-
-  * **Splitting multi-allelic variants**: This is a recommended practice to separate records containing multiple alternative alleles. The goal is to have variants uniquely defined by `CHROM:POS:REF:ALT`.
-
-    ```bash
-    bcftools norm -m-any --check-ref w -f fasta_file.fa merged_file_cohort1.vcf.gz -Oz -o splt_merged_file_cohort1.vcf.gz
-    ```
-
-    Where `fasta_file.fa` is the reference genome used (e.g., `hg19.fa`). It is common for references like hg19 to have chromosomes named with `N` instead of `chrN`. Always check the specifications of the tool and the reference genome. Generally, these files (e.g., `hg19.fa`, `hg38.fa`) must be in the same directory as their index files (`.fai`).
-
 
 #### NOTE
 
 It is very important to split multi-allelic records. Often, alternative alleles can be represented as `<NON_REF>`, depending on how the VCFs were generated. Therefore, it is good practice to:
 
-1. Split multi-allelic variants (already done),
-2. Remove those that have `<NON_REF>` as an ALT allele,
-3. And correct possible REF/ALT discrepancies with respect to the reference genome.
+1. Split multi-allelic variants
+2. Remove those that have `<NON_REF>` as an ALT allele
+3. And correct possible REF/ALT discrepancies with respect to the reference genome
 
-This can be done with the following command:
+This can be done with the following commands:
+
+**Splitting multi-allelic variants**: This is a recommended practice to separate records containing multiple alternative alleles. The goal is to have variants uniquely defined by `CHROM:POS:REF:ALT`.
+
+    ```bash
+    bcftools norm -m-any --check-ref w -f /path/to/hg19.fa # or hg38.fa \
+    /path/to/merged_file_cohort1.vcf.gz -Oz -o /path/to/splt_merged_file_cohort1.vcf.gz
+    ```
+Where `hg19.fa` or `hg38.fa` is the reference genome used. Note that it is common for references like hg19 to have chromosomes named with `N` instead of `chrN`. 
+Always check the specifications of the tool and the reference genome. Generally, these files (e.g., `hg19.fa`, `hg38.fa`) **must be** in the same directory as their index files (`.fai`).
+
+***Remove the `<NON_REF>` as an ALT allele and correct possible REF/ALT discrepancies**
 
 ```bash
-bcftools +fixref splt_merged_file_cohort1.vcf.gz -Ou -- -f reference.fa --mode flip --discard | \
-bcftools view -e 'ALT="<NON_REF>"' -Oz -o fixref_splt_merged_file_cohort1.vcf.gz
+bcftools +fixref /path/to/splt_merged_file_cohort1.vcf.gz -Ou -- -f/path/to/hg19.fa # or hg38.fa --mode flip --discard | \
+bcftools view -e 'ALT="<NON_REF>"' -Oz -o /path/to/fixref_splt_merged_file_cohort1.vcf.gz
 ```
 
 
@@ -199,7 +201,7 @@ It is good practice to perform some checks on the final merged VCF file:
   * **Verify the number of variants**: Ensure it matches expectations (common variants + unique variants from both files).
 
     ```bash
-    zgrep -v "#" merged_cohorts.vcf.gz | wc -l
+    zgrep -v "#" /path/to/merged_cohorts.vcf.gz | wc -l
     ```
 
     Run the same command on the original files for comparison.
@@ -207,7 +209,7 @@ It is good practice to perform some checks on the final merged VCF file:
   * **Recreate a statistics file**:
 
     ```bash
-    bcftools stats merged_cohorts.vcf.gz > merged_cohorts.stat
+    bcftools stats /path/to/merged_cohorts.vcf.gz > /path/to/merged_cohorts.stat
     ```
 
   * **Check for any REF/ALT flips post-merge**:
