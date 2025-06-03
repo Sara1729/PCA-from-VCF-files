@@ -92,7 +92,73 @@ bcftools merge --threads 64 -l list_vcf.list -Oz -o /path/to/merged_file_cohort1
 
 ### 2\) Normalizing VCF File Headers (Specific to a Case Study)
 
-At this point, we might want to modify the VCF file headers so that the `CHROM` column uses the `N` notation (instead of `chrN`) and the `ID` column contains identifiers in the `CHROM:POS:REF:ALT` format instead of, for example, `rs` identifiers.
+At this point, we might want to modify the VCF file headers. This normalization process aims to achieve two main objectives:
+1.  Ensure the `CHROM` column consistently uses the numerical or symbolic `N` notation (e.g., `1`, `X`) instead of the `chrN` notation (e.g., `chr1`, `chrX`).
+2.  Standardize the `ID` column to contain unique identifiers in the `CHROM:POS:REF:ALT` format, potentially replacing other identifiers like `rs` numbers.
+
+For the chromosome name conversion aspect of these steps, the use of specific mapping files is assumed. These files define the correspondence between different chromosome naming conventions. The two files are:
+
+* **`no_chr_name_convention.txt`**: This file is used to convert chromosome names from the `chrN` style to the `N` style (i.e., removing the "chr" prefix). It is a tab-separated file where the first column is the chromosome name with the "chr" prefix, and the second column is its corresponding numerical or symbolic representation.
+
+    ```text
+    chr1     1
+    chr2     2
+    chr3     3
+    chr4     4
+    chr5     5
+    chr6     6
+    chr7     7
+    chr8     8
+    chr9     9
+    chr10    10
+    chr11    11
+    chr12    12
+    chr13    13
+    chr14    14
+    chr15    15
+    chr16    16
+    chr17    17
+    chr18    18
+    chr19    19
+    chr20    20
+    chr21    21
+    chr22    22
+    chrX     X
+    ```
+
+* **`chr_name_conv.txt`**: This file serves the opposite purpose, mapping numerical or symbolic chromosome names (without "chr") to the `chrN` convention. It is also a tab-separated file, with the numerical/symbolic name in the first column and the "chr" prefixed name in the second column.
+
+    ```text
+    1        chr1
+    2        chr2
+    3        chr3
+    4        chr4
+    5        chr5
+    6        chr6
+    7        chr7
+    8        chr8
+    9        chr9
+    10       chr10
+    11       chr11
+    12       chr12
+    13       chr13
+    14       chr14
+    15       chr15
+    16       chr16
+    17       chr17
+    18       chr18
+    19       chr19
+    20       chr20
+    21       chr21
+    22       chr22
+    23       chrX
+    24       chrY
+    25       chrXY
+    26       chrMT
+    ```
+---
+
+
 
   * **Creating the `ID` column in `CHROM:POS:REF:ALT` format**:
 
@@ -106,7 +172,7 @@ At this point, we might want to modify the VCF file headers so that the `CHROM` 
     ```
 
   * **Changing the `CHROM` column nomenclature from `chrN` to `N`**:
-    For this step, the use of a mapping file `no_chr_name_convention.txt` is assumed.
+   
 
     ```bash
     bcftools annotate --rename-chrs/path/to/no_chr_name_convention.txt \
@@ -128,12 +194,12 @@ To merge two VCF files (e.g., one per cohort, already preprocessed as described 
 bcftools merge --threads 64 \
 /path/to/noCHR_newID_fixref_splt_merged_file_cohort1.vcf.gz \
 /path/to/noCHR_newID_fixref_splt_merged_file_cohort2.vcf.gz \
--Oz -o /path/to/merged_cohort2.vcf.gz
+-Oz -o /path/to/merged_cohorts.vcf.gz
 ```
 
 **Expected number of variants in the merged file**:
 
-  * The total number of variants in the `merged_cohort2.vcf.gz` file will be: (Number of unique variants in file 1) + (Number of unique variants in file 2) + (Number of variants common to both files).
+  * The total number of variants in the `merged_cohorts.vcf.gz` file will be: (Number of unique variants in file 1) + (Number of unique variants in file 2) + (Number of variants common to both files).
   * There will be no duplication of rows for common variants (same position, REF, and ALT). These will be merged into a single record containing sample data from both files.
 
 -----
@@ -145,7 +211,7 @@ It is good practice to perform some checks on the final merged VCF file:
   * **Verify the number of variants**: Ensure it matches expectations (common variants + unique variants from both files).
 
     ```bash
-    zgrep -v "#" merged_cohort2.vcf.gz | wc -l
+    zgrep -v "#" merged_cohorts.vcf.gz | wc -l
     ```
 
     Run the same command on the original files for comparison.
@@ -153,7 +219,7 @@ It is good practice to perform some checks on the final merged VCF file:
   * **Recreate a statistics file**:
 
     ```bash
-    bcftools stats merged_cohort2.vcf.gz > merged_cohort2.stat
+    bcftools stats merged_cohorts.vcf.gz > merged_cohorts.stat
     ```
 
   * **Check for any REF/ALT flips post-merge**:
@@ -163,29 +229,42 @@ It is good practice to perform some checks on the final merged VCF file:
 
         ```bash
         bcftools annotate --rename-chrs /path/to/chr_name_conv.txt \
-        /path/to/merged_cohort2.vcf.gz \
-        -o /path/to/CHR_merged_cohort2.vcf.gz
+        /path/to/merged_cohorts.vcf.gz \
+        -o /path/to/CHR_merged_cohorts.vcf.gz
         ```
 
-      * Use `fixref` to check and correct any flips:
+      * **OPTIONAL** Use `fixref` to check and correct any flips:
 
         ```bash
-        bcftools +fixref /path/to/CHR_merged_cohort2.vcf.gz \
-        -Oz -o NEW_merged_amati_main_FIXREF.vcf.gz \
+        bcftools +fixref /path/to/CHR_merged_cohorts.vcf.gz \
+        -Oz -o /path/to/FIXREF_CHR_merged_cohorts.vcf.gz \
         -- -f /path/to/hg19.fa # or hg38.fa
         --mode flip --discard
         ```
 
 -----
 
-## 9\) Running PCA with Plink
+## 9\) **OPTIONAL** Extracting Selected Variants
 
-Once the final merged and normalized VCF file (e.g., `merged_cohort2.vcf.gz`) is obtained, PCA can be performed.
+If you have a list of selected variants on which you want to perform PCA, and therefore you need to work with only a subset of the variants present in your `vcf.gz` file, execute the following command:
+
+```bash
+bcftools view --include 'ID=@variant_list.txt' \
+    /path/to/CHR_merged_cohorts.vcf.gz \
+    -Oz -o /path/to/VAR_selected_CHR_merged_cohorts.vcf.gz
+```
+
+**Note:** In this particular case, because we want to extract variants using only the ID field (which should be formatted as `CHROM:POS:REF:ALT`), the `variant_list.txt` file must be a single-column file. Each row in this file should contain a distinct variant ID in the following format:`CHROM:POS:REF:ALT`
+
+
+## 10\) Running PCA with Plink
+
+Once the final merged and normalized VCF file (e.g., `merged_cohorts.vcf.gz` or `FIXREF_CHR_merged_cohorts.vcf.gz` or  `VAR_selected_CHR_merged_cohorts.vcf.gz`) is obtained, PCA can be performed.
 
 Launch the Docker container with `plink`:
 
 ```bash
-plink --vcf /path/to/merged_cohort2.vcf.gz --pca --double-id --out merged_cohort2
+plink --vcf /path/to/merged_cohorts.vcf.gz --pca --double-id --out merged_cohorts
 ```
 
 Options used:
@@ -193,7 +272,7 @@ Options used:
   * `--vcf`: Specifies the input VCF file.
   * `--pca`: Performs principal component analysis.
   * `--double-id`: Ensures FID and IID are preserved.
-  * `--out`: Prefix for output files (`merged_cohort2.eigenvec`, `merged_cohort2.eigenval`, `merged_cohort2.log`).
+  * `--out`: Prefix for output files (`merged_cohorts.eigenvec`, `merged_cohorts.eigenval`, `merged_cohorts.log`).
 
 -----
 
