@@ -72,7 +72,7 @@ To run this pipeline, you will need:
         25       chrXY
         26       chrMT
         ```
-- Reference genome FASTA (.fa) and its index (.fai) for the chosen build (e.g., hg19/hg38), available from here [hg19](https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/), here [hg38](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/).
+- Reference genome FASTA (.fa) and its index (.fai) for the chosen build (e.g., hg19/hg38), available from here ([hg19](https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/)/[hg38](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/)).
 
 
 #### Plink overview
