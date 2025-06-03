@@ -123,15 +123,22 @@ bcftools merge --threads 64 -l list_vcf.list -Oz -o /path/to/merged_file_cohort1
 
     Where `fasta_file.fa` is the reference genome used (e.g., `hg19.fa`). It is common for references like hg19 to have chromosomes named with `N` instead of `chrN`. Always check the specifications of the tool and the reference genome. Generally, these files (e.g., `hg19.fa`, `hg38.fa`) must be in the same directory as their index files (`.fai`).
 
-> #### NOTE
->
-> It is very important to split multi-allelic records. Often, alternative alleles can be represented as `<NON_REF>` (depending on how the VCFs were generated). Therefore, it is good practice to split multi-allelic variants and eliminate those that have `<NON_REF>` as an ALT allele.
->
-> A subsequent step can be the correction of possible REF/ALT discrepancies with respect to the reference genome:
->
-> ```bash
-> bcftools +fixref splt_merged_file_cohort1.vcf.gz -Oz -o fixref_splt_merged_file_cohort1.vcf.gz -- -f fasta_file.fa --mode flip --discard
-> ```
+
+#### NOTE
+
+It is very important to split multi-allelic records. Often, alternative alleles can be represented as `<NON_REF>`, depending on how the VCFs were generated. Therefore, it is good practice to:
+
+1. Split multi-allelic variants (already done),
+2. Remove those that have `<NON_REF>` as an ALT allele,
+3. And correct possible REF/ALT discrepancies with respect to the reference genome.
+
+This can be done with the following command:
+
+```bash
+bcftools +fixref splt_merged_file_cohort1.vcf.gz -Ou -- -f reference.fa --mode flip --discard | \
+bcftools view -e 'ALT="<NON_REF>"' -Oz -o fixref_splt_merged_file_cohort1.vcf.gz
+```
+
 
 > #### NOTE
 >
