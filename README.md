@@ -17,7 +17,33 @@ To run this pipeline, you will need:
 - PLINK version 1.9 (either [installed directly](https://www.cog-genomics.org/plink/) or via a [Docker container](https://github.com/asherkhb/plink-docker) ).
 - BCFtools installed (either installed directly or via a Docker container [https://github.com/samtools/bcftools](url)).
 - Two chromosome naming convention files:
-    - The first file (in our case, named `chr_name_conv.txt`) must contain two columns: the first column with chromosome names like `chrN` (for N = 1, ...22, X, Y) and the second column with the corresponding `N` (for N = 1, ...22, X, Y).
+    - The first file (in our case, named `no_chr_name_convention.txt`) must contain two columns: the first column with chromosome names like `chrN` (for N = 1, ...22, X, Y) and the second column with the corresponding `N` (for N = 1, ...22, X, Y).
+      ```text
+        chr1     1
+        chr2     2
+        chr3     3
+        chr4     4
+        chr5     5
+        chr6     6
+        chr7     7
+        chr8     8
+        chr9     9
+        chr10    10
+        chr11    11
+        chr12    12
+        chr13    13
+        chr14    14
+        chr15    15
+        chr16    16
+        chr17    17
+        chr18    18
+        chr19    19
+        chr20    20
+        chr21    21
+        chr22    22
+        chrX     X
+        ```
+    - The second file (in our case, named `chr_name_conv.txt`) must also contain two columns, but with the order inverted compared to the first file (i.e., `N` in the first column and `chrN` in the second).
         ```text
         1        chr1
         2        chr2
@@ -46,32 +72,7 @@ To run this pipeline, you will need:
         25       chrXY
         26       chrMT
         ```
-    - The second file (in our case, named `no_chr_name_convention.txt`) must also contain two columns, but with the order inverted compared to the first file (i.e., `N` in the first column and `chrN` in the second).
-      ```text
-        chr1     1
-        chr2     2
-        chr3     3
-        chr4     4
-        chr5     5
-        chr6     6
-        chr7     7
-        chr8     8
-        chr9     9
-        chr10    10
-        chr11    11
-        chr12    12
-        chr13    13
-        chr14    14
-        chr15    15
-        chr16    16
-        chr17    17
-        chr18    18
-        chr19    19
-        chr20    20
-        chr21    21
-        chr22    22
-        chrX     X
-        ```
+
 
 #### Plink
 
