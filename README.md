@@ -12,18 +12,76 @@ Eigenvalues are sorted from largest to smallest. In short, the first eigenvalue 
 
 Through this process, we are able to identify a lower-dimensional subspace, or an equivalent space, that "better" describes the distribution of our data.
 
+## Prerequisites and Tools
 To run this pipeline, you will need:
-- PLINK (either installed directly or via a Docker container [https://github.com/asherkhb/plink-docker](url) ).
-- BCFtools installed (either installed directly or via a Docker container).
+- PLINK version 1.9 (either [installed directly](https://www.cog-genomics.org/plink/) or via a [Docker container](https://github.com/asherkhb/plink-docker) ).
+- BCFtools installed (either installed directly or via a Docker container [https://github.com/samtools/bcftools](url)).
 - Two chromosome naming convention files:
     - The first file (in our case, named `chr_name_conv.txt`) must contain two columns: the first column with chromosome names like `chrN` (for N = 1, ...22, X, Y) and the second column with the corresponding `N` (for N = 1, ...22, X, Y).
     - The second file (in our case, named `no_chr_name_convention.txt`) must also contain two columns, but with the order inverted compared to the first file (i.e., `N` in the first column and `chrN` in the second).
+    * **`no_chr_name_convention.txt`**: This file is used to convert chromosome names from the `chrN` style to the `N` style (i.e., removing the "chr" prefix). It is a tab-separated file where the first column is the chromosome name with the "chr" prefix, and the     second column is its corresponding numerical or symbolic representation.
+      ---
+        ```text
+        chr1     1
+        chr2     2
+        chr3     3
+        chr4     4
+        chr5     5
+        chr6     6
+        chr7     7
+        chr8     8
+        chr9     9
+        chr10    10
+        chr11    11
+        chr12    12
+        chr13    13
+        chr14    14
+        chr15    15
+        chr16    16
+        chr17    17
+        chr18    18
+        chr19    19
+        chr20    20
+        chr21    21
+        chr22    22
+        chrX     X
+        ```
+        ---
 
-## Prerequisites and Tools
+    * **`chr_name_conv.txt`**: This file serves the opposite purpose, mapping numerical or symbolic chromosome names (without "chr") to the `chrN` convention. It is also a tab-separated file, with the numerical/symbolic name in the first column and the "chr" prefixed name in the second column.
+      ---
+        ```text
+        1        chr1
+        2        chr2
+        3        chr3
+        4        chr4
+        5        chr5
+        6        chr6
+        7        chr7
+        8        chr8
+        9        chr9
+        10       chr10
+        11       chr11
+        12       chr12
+        13       chr13
+        14       chr14
+        15       chr15
+        16       chr16
+        17       chr17
+        18       chr18
+        19       chr19
+        20       chr20
+        21       chr21
+        22       chr22
+        23       chrX
+        24       chrY
+        25       chrXY
+        26       chrMT
+        ```
+    ---
 
-### Plink
 
-The tool used to perform PCA is `plink`. The reference version is 1, used via a Docker container.
+#### Plink
 
 `Plink` accepts VCF files as input (which must be accompanied by their respective `.tbi` index file). It is crucial that the VCF file contains the `GT` (genotype) field for each sample.
 
@@ -90,77 +148,13 @@ bcftools merge --threads 64 -l list_vcf.list -Oz -o /path/to/merged_file_cohort1
 
 -----
 
+
 ### 2\) Normalizing VCF File Headers (Specific to a Case Study)
 
-At this point, we might want to modify the VCF file headers. This normalization process aims to achieve two main objectives:
-1.  Ensure the `CHROM` column consistently uses the numerical or symbolic `N` notation (e.g., `1`, `X`) instead of the `chrN` notation (e.g., `chr1`, `chrX`).
-2.  Standardize the `ID` column to contain unique identifiers in the `CHROM:POS:REF:ALT` format, potentially replacing other identifiers like `rs` numbers.
+At this point, we might want to modify the VCF file headers so that the `CHROM` column uses the `N` notation (instead of `chrN`) and the `ID` column contains identifiers in the `CHROM:POS:REF:ALT` format instead of, for example, `rs` identifiers.
+For these steps, the use of a mapping files `no_chr_name_convention.txt` and `chr_name_conv.txt` is assumed.
 
-For the chromosome name conversion aspect of these steps, the use of specific mapping files is assumed. These files define the correspondence between different chromosome naming conventions. The two files are:
-
-* **`no_chr_name_convention.txt`**: This file is used to convert chromosome names from the `chrN` style to the `N` style (i.e., removing the "chr" prefix). It is a tab-separated file where the first column is the chromosome name with the "chr" prefix, and the second column is its corresponding numerical or symbolic representation.
-
-    ```text
-    chr1     1
-    chr2     2
-    chr3     3
-    chr4     4
-    chr5     5
-    chr6     6
-    chr7     7
-    chr8     8
-    chr9     9
-    chr10    10
-    chr11    11
-    chr12    12
-    chr13    13
-    chr14    14
-    chr15    15
-    chr16    16
-    chr17    17
-    chr18    18
-    chr19    19
-    chr20    20
-    chr21    21
-    chr22    22
-    chrX     X
-    ```
-
-* **`chr_name_conv.txt`**: This file serves the opposite purpose, mapping numerical or symbolic chromosome names (without "chr") to the `chrN` convention. It is also a tab-separated file, with the numerical/symbolic name in the first column and the "chr" prefixed name in the second column.
-
-    ```text
-    1        chr1
-    2        chr2
-    3        chr3
-    4        chr4
-    5        chr5
-    6        chr6
-    7        chr7
-    8        chr8
-    9        chr9
-    10       chr10
-    11       chr11
-    12       chr12
-    13       chr13
-    14       chr14
-    15       chr15
-    16       chr16
-    17       chr17
-    18       chr18
-    19       chr19
-    20       chr20
-    21       chr21
-    22       chr22
-    23       chrX
-    24       chrY
-    25       chrXY
-    26       chrMT
-    ```
----
-
-
-
-  * **Creating the `ID` column in `CHROM:POS:REF:ALT` format**:
+* **Creating the `ID` column in `CHROM:POS:REF:ALT` format**:
 
     ```bash
     bcftools annotate --rename-chrs /path/to/chr_name_conv.txt \
