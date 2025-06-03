@@ -133,6 +133,9 @@ bcftools merge --threads 64 -l list_vcf.list -Oz -o /path/to/merged_file_cohort1
 > bcftools +fixref splt_merged_file_cohort1.vcf.gz -Oz -o fixref_splt_merged_file_cohort1.vcf.gz -- -f fasta_file.fa --mode flip --discard
 > ```
 
+> #### NOTE
+>
+> Step 2) is specific to particular normalization needs (like those mentioned in the NIG case study). If the `CHROM` and `ID` columns are already consistent, you can proceed directly to step 3).
 -----
 
 
@@ -160,15 +163,13 @@ For these steps, the use of a mapping files `no_chr_name_convention.txt` and `ch
     -Oz -o /path/to/noCHR_newID_fixref_splt_merged_file_cohort1.vcf.gz
     ```
 
-> #### NOTE
->
-> Step 2) is specific to particular normalization needs (like those mentioned in the NIG case study). If the `CHROM` and `ID` columns are already consistent and the `vcf.gz` files are aligned to the same reference genome, you can proceed directly to step 3).
-
 -----
 
 ### 3) Merging Cohorts
 
 To merge two VCF files (e.g., one per cohort, already preprocessed as described above), `bcftools merge` is the recommended tool.
+
+> NOTE: the `vcf.gz` files must be aligned to the same reference genome hg38 or hg19.
 
 ```bash
 bcftools merge --threads 64 \
@@ -213,7 +214,7 @@ It is good practice to perform some checks on the final merged VCF file:
         -o /path/to/CHR_merged_cohorts.vcf.gz
         ```
 
-  * **OPTIONAL** Use `fixref` to check and correct any flips:
+## 5) **OPTIONAL** Use `fixref` to check and correct any flips:
 
     ```bash
     bcftools +fixref /path/to/CHR_merged_cohorts.vcf.gz \
@@ -224,7 +225,7 @@ It is good practice to perform some checks on the final merged VCF file:
 
 -----
 
-## 5) **OPTIONAL** Extracting Selected Variants
+## 6) **OPTIONAL** Extracting Selected Variants
 
 If you have a list of selected variants on which you want to perform PCA, and therefore you need to work with only a subset of the variants present in your `vcf.gz` file, execute the following command:
 
@@ -237,7 +238,7 @@ bcftools view --include 'ID=@variant_list.txt' \
 **Note:** In this particular case, because we want to extract variants using only the ID field (which should be formatted as `CHROM:POS:REF:ALT`), the `variant_list.txt` file must be a single-column file. Each row in this file should contain a distinct variant ID in the following format:`CHROM:POS:REF:ALT`
 
 
-## 6) Running PCA with Plink
+## 7) Running PCA with Plink
 
 Once the final merged and normalized VCF file (e.g., `merged_cohorts.vcf.gz` or `FIXREF_CHR_merged_cohorts.vcf.gz` or  `VAR_selected_CHR_merged_cohorts.vcf.gz`) is obtained, PCA can be performed.
 
