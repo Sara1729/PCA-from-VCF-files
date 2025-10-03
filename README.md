@@ -295,11 +295,12 @@ Here is the new section written in English, formatted to be perfectly consistent
 
 ## 8) (Optional but Recommended) Outlier Identification and Removal
 
-After performing PCA, a crucial step is to identify **outliers**—samples that are genetically distant from the main clusters. These samples could represent individuals of a different ancestry, sample contamination, or technical artifacts. Removing them is important as they can skew the principal components and affect downstream analyses.
+After performing PCA, a crucial step is to identify **outliers**—samples. These samples could represent individuals of a different ancestry, sample contamination, or technical artifacts. Removing them is important as they can skew the principal components and affect downstream analyses.
 
-A first approach is to visually inspect a scatter plot of the first two principal components (PC1 vs. PC2). However, for a more robust and multidimensional identification, we can use the **Mahalanobis distance**.
+To identify multidimensional outliers, one can employ the [Mahalanobis distance](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/mahalanobis) 
 
-This metric measures the distance of each sample from the center of the data's distribution, taking into account the covariance between the principal components. This allows us to evaluate a sample based on multiple PCs simultaneously (e.g., the first 10), providing a more reliable method for outlier detection.
+This metric quantifies the distance of each observation from the centroid of the data distribution (the mean vector), while accounting for the covariance structure among variables. By weighting contributions according to the correlations between features (or principal components), Mahalanobis distance provides a multivariate measure of deviation.
+This allows outlier detection to be performed simultaneously across multiple principal components (e.g., the first 10 PCs), offering a more robust and reliable criterion compared to univariate approaches.
 
 ### Implementation with R
 
@@ -368,9 +369,9 @@ ggplot(eigenvectors, aes(x = PC1, y = PC2, color = is_outlier)) +
        y = "Principal Component 2 (PC2)") +
   coord_fixed()
 
-# Extract the FID and IID of the outlier samples
-# Plink's --remove flag requires a two-column file (FID and IID) without a header
-outliers_to_remove <- eigenvectors[eigenvectors$is_outlier, c("FID", "IID")]
+# Extract the ID of the outlier samples
+# Plink's --remove flag requires a two-column file (ID) without a header
+outliers_to_remove <- eigenvectors[eigenvectors$is_outlier, c("ID")]
 
 # Write the file that Plink will use for removal
 output_file <- "outliers_to_remove.txt"
