@@ -293,12 +293,11 @@ Here is the new section written in English, formatted to be perfectly consistent
 
 <br>
 
-## 8) (Optional but Recommended) Outlier Identification and Removal
+## 8) Outlier Identification and Removal
 
 After performing PCA, a crucial step is to identify **outliers**—samples that are genetically distant from the main clusters. These samples could represent individuals of a different ancestry, sample contamination, or technical artifacts. Removing them is important as they can skew the principal components and affect downstream analyses.
 
-A first approach is to visually inspect a scatter plot of the first two principal components (PC1 vs. PC2). However, for a more robust and multidimensional identification, we can use the **Mahalanobis distance**.
-
+A first approach is to visually inspect a scatter plot of the first two principal components (PC1 vs. PC2). However, for a more robust and multidimensional identification, we can use the [Mahalanobis distance](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/mahalanobis).
 This metric measures the distance of each sample from the center of the data's distribution, taking into account the covariance between the principal components. This allows us to evaluate a sample based on multiple PCs simultaneously (e.g., the first 10), providing a more reliable method for outlier detection.
 
 ### Implementation with R
@@ -307,7 +306,7 @@ The following R script can be used to identify outliers from the `.eigenvec` fil
 
 1.  Loads the eigenvector file.
 2.  Calculates the Mahalanobis distance for each sample using the first 10 PCs.
-3.  Sets a threshold based on the Chi-squared distribution (using the 0.999 quantile and 10 degrees of freedom).
+3.  Sets a threshold based on the Chi-squared distribution (e.g. 0.999 quantile and n degrees of freedom/number of principal components).
 4.  Flags any sample exceeding the threshold as an outlier.
 5.  Generates a PC1 vs. PC2 plot highlighting the outliers.
 6.  Creates a text file (`outliers_to_remove.txt`) containing the IDs of the samples to be removed.
@@ -371,7 +370,7 @@ ggplot(eigenvectors, aes(x = PC1, y = PC2, color = is_outlier)) +
 # Extract the ID of the outlier samples
 outliers_to_remove <- eigenvectors[eigenvectors$is_outlier, c("ID")]
 
-# Write the file that Plink will use for removal
+# Write the outlier file
 output_file <- "outliers_to_remove.txt"
 write.table(outliers_to_remove,
             file = output_file,
@@ -380,6 +379,5 @@ write.table(outliers_to_remove,
             col.names = FALSE, 
             quote = FALSE)
 
-cat("File '", output_file, "' created with", nrow(outliers_to_remove), "samples to remove.\n")
 ```
 
