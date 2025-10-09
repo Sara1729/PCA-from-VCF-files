@@ -295,7 +295,7 @@ Here is the new section written in English, formatted to be perfectly consistent
 
 ## 8) Outlier Identification and Removal
 
-After performing PCA, a crucial step is to identify **outliers**—samples. These samples could represent individuals of a different ancestry, sample contamination, or technical artifacts. Removing them is important as they can skew the principal components and affect downstream analyses.
+After performing PCA, a crucial step is to identify *outliers*. These samples could represent individuals of a different ancestry, sample contamination, or technical artifacts. Removing them is important as they can skew the principal components and affect downstream analyses.
 
 To identify multidimensional outliers, one can employ the [Mahalanobis distance](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/mahalanobis) 
 
