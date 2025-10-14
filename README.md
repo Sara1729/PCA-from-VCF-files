@@ -280,18 +280,6 @@ If the goal is to keep only the variants present in *both* VCF files before merg
 
     The `-n=2` option specifies that a variant must be present in both input files to be included in the `merged_common_variants.vcf.gz` output.
 
-<!-- end list -->
-
-```
-```
-
-You are absolutely right. My apologies—I completely missed that the guide was in English and responded in Italian based on our conversation. Thank you for the correction and for providing the file again.
-
-Here is the new section written in English, formatted to be perfectly consistent with the rest of your README file. You can copy and paste this directly into your document.
-
------
-
-<br>
 
 ## 8) Outlier Identification and Removal
 
