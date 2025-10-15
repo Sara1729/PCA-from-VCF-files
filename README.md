@@ -358,7 +358,7 @@ ggplot(eigenvectors, aes(x = PC1, y = PC2, color = is_outlier)) +
   coord_fixed()
 
 # Extract the ID of the outlier samples
-# Plink's --remove flag requires a two-column file (ID) without a header
+# Plink's --remove flag requires a one-column file (ID) without a header
 outliers_to_remove <- eigenvectors[eigenvectors$is_outlier, c("ID")]
 
 # Write the file that Plink will use for removal
